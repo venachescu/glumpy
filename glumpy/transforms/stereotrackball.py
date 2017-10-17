@@ -8,7 +8,7 @@ from . transform import Transform
 from glumpy import gl, glm, library
 
 
-class Trackball(Transform):
+class StereoTrackball(Transform):
     """
     3D trackball transform
 
@@ -88,7 +88,7 @@ class Trackball(Transform):
         self._height = 1
         self._window_aspect = 1
 
-        self._trackball = _trackball.Trackball(45,45)
+        self._trackball = _trackball.StereoTrackball(45,45)
         self._projection = np.eye(4, dtype=np.float32)
         self._view = np.eye(4, dtype=np.float32)
         glm.translate(self._view, 0, 0, -abs(self._distance))
@@ -146,7 +146,7 @@ class Trackball(Transform):
         return self._zoom
 
 
-    @zoom.setter
+    @phi.setter
     def zoom(self, value):
         """ Zoom level (aperture angle in degrees) """
 

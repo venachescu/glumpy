@@ -7,7 +7,7 @@ from . transform import Transform
 from glumpy import gl, glm, library
 
 
-class PVMProjection(Transform):
+class PVMFrustum(Transform):
     """
     Perspective projection is an approximate representation, on a flat surface
     of an image as it is seen by the eye. The two most characteristic features
@@ -90,7 +90,7 @@ class PVMProjection(Transform):
         self._distance = Transform._get_kwarg("distance", kwargs) or 5
         self._fovy     = Transform._get_kwarg("fovy", kwargs) or 40
         self._znear    = Transform._get_kwarg("znear", kwargs) or 2.0
-        self._zfar     = Transform._get_kwarg("znear", kwargs) or 100.0
+        self._zfar     = Transform._get_kwarg("zfar", kwargs) or 100.0
         self._view = np.eye(4, dtype=np.float32)
         self._model = np.eye(4, dtype=np.float32)
         self._projection = np.eye(4, dtype=np.float32)
@@ -163,7 +163,7 @@ class PVMProjection(Transform):
     @property
     def zfar(self):
         """ Z far clipping place """
-        return self._znear
+        return self._zfar
 
     @zfar.setter
     def zfar(self, value):
@@ -172,6 +172,10 @@ class PVMProjection(Transform):
         if value > self._znear:
             self._zfar = value
             self._build_projection()
+
+    @property
+    def aspect_ratio(self):
+        return float(self._width) / float(self._height)
 
     def on_attach(self, program):
         self["view"] = self._view
@@ -190,9 +194,19 @@ class PVMProjection(Transform):
         Transform.on_resize(self, width, height)
 
     def _build_projection(self):
+
         # We need to have caught at least one resize event
         if self._width is None: return
-
         aspect = self._width / float(self._height)
-        self['projection'] = glm.perspective(self.fovy, aspect,
-                                             self._znear, self._zfar)
+
+        ipd = 0.05
+        delta = self.znear * np.tanh(np.deg2rad(self.fovy / 2.0))
+        parallax = self.znear / self.zfar
+
+        self['projection'] = glm.frustum(
+            -aspect * delta + (ipd / 2.0 * parallax),
+            aspect * delta + (ipd / 2.0 * parallax),
+            -delta, delta, self.znear, self.zfar
+        )
+        # self['projection'] = glm.perspective(self.fovy, aspect,
+                                             # self._znear, self._zfar)

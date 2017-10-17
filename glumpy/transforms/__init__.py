@@ -26,6 +26,7 @@ from .azimuthal_equidistant import AzimuthalEquidistantProjection
 
 
 from .pvm_projection import PVMProjection
+from .pvm_frustum import PVMFrustum
 # from perpective_projection import PerspectiveProjection
 from .orthographic_projection import OrthographicProjection
 
