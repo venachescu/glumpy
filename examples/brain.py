@@ -73,7 +73,7 @@ def update():
     brain['m_view']  = view
     brain['m_model'] = model
     brain['m_normal'] = np.array(np.matrix(np.dot(view, model)).I.T)
-    
+
 @window.event
 def on_draw(dt):
     window.clear()
@@ -82,7 +82,7 @@ def on_draw(dt):
 @window.event
 def on_mouse_drag(x, y, dx, dy, button):
     update()
-    
+
 @window.event
 def on_init():
     gl.glEnable(gl.GL_DEPTH_TEST)
