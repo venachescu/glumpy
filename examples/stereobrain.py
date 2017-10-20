@@ -3,7 +3,7 @@
 # Distributed under the (new) BSD License.
 # -----------------------------------------------------------------------------
 import numpy as np
-from glumpy import app, gl, gloo, data, log
+from glumpy import app, gl, gloo, glm, data, log
 from glumpy.transforms import Trackball, PVMProjection, PVMFrustum, Position
 
 
@@ -62,10 +62,12 @@ vertices,indices = data.get("brain.obj")
 
 brainl = gloo.Program(vertex, fragment)
 brainl.bind(vertices)
+transform = PVMFrustum(Position("position"))
+brainl['transform'] = transform
 
-trackball = Trackball(Position("position"))
-brainl['transform'] = trackball
-trackball.theta, trackball.phi, trackball.zoom = 80, -135, 15
+# trackball = Trackball(Position("position"))
+# brainl['transform'] = trackball
+# trackball.theta, trackball.phi, trackball.zoom = 80, -135, 15
 
 vertices,indices = data.get("brain.obj")
 
@@ -76,28 +78,47 @@ brainr.bind(vertices)
 transform = PVMFrustum(Position("position"))
 brainr['transform'] = transform
 
-windowl = app.Window(width=1024, height=768)
+windowl = app.Window(width=1024, height=768, fullscreen=True)
 windowr = app.Window(width=1024, height=768)
 
+n_view = np.array((0., 0., -1.))
+n_up = np.array((0., 1., 0.))
+n_eye = np.array((1., 0., 0.))
+interpupil = 0.1
 
 def update():
 
-    model = brainl['transform']['model'].reshape(4,4)
-    view  = brainl['transform']['view'].reshape(4,4)
-    brainl['m_view']  = view
-    brainl['m_model'] = model
-    brainl['m_normal'] = np.array(np.matrix(np.dot(view, model)).I.T)
+    global phi, theta, duration, interpupil
 
-    transform.fovy = trackball.zoom
+    # Rotate cube
+    theta += 0.5 # degrees
+    phi += 0.5 # degrees
+    model = np.eye(4, dtype=np.float32)
+    glm.rotate(model, theta, 0, 0, 1)
+    glm.rotate(model, phi, 0, 1, 0)
+
+    # model = brainl['transform']['model'].reshape(4,4)
+    # view = glm.translation(0, 0, -5)
+    # view  = brainl['transform']['view'].reshape(4,4)
+    viewl = glm.translation((interpupil / 2.0), 0, -5)
+    brainl['transform']['model'] = model
+    brainl['transform']['view'] = viewl
+    brainl['m_view']  = viewl
+    brainl['m_model'] = model
+    brainl['m_normal'] = np.array(np.matrix(np.dot(viewl, model)).I.T)
+
+    # transform.fovy = trackball.zoom
+    viewr = glm.translation(-(interpupil / 2.0), 0, -5)
     brainr['transform']['model'] = model
-    brainr['transform']['view'] = view
-    brainr['m_view']  = view
+    brainr['transform']['view'] = viewr
+    brainr['m_view']  = viewr
     brainr['m_model'] = model
-    brainr['m_normal'] = np.array(np.matrix(np.dot(view, model)).I.T)
+    brainr['m_normal'] = np.array(np.matrix(np.dot(viewr, model)).I.T)
 
 
 @windowl.event
 def on_draw(dt):
+    update()
     windowl.clear()
     brainl.draw(gl.GL_TRIANGLES)
 
@@ -124,6 +145,8 @@ def on_init():
     gl.glEnable(gl.GL_DEPTH_TEST)
     update()
 
+
+phi, theta = 40, 30
 
 windowl.attach(brainl['transform'])
 windowr.attach(brainr['transform'])

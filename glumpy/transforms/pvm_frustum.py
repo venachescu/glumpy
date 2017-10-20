@@ -87,6 +87,7 @@ class PVMFrustum(Transform):
 
         self._width     = None
         self._height    = None
+        self._interpupil = 0.1
         self._distance = Transform._get_kwarg("distance", kwargs) or 5
         self._fovy     = Transform._get_kwarg("fovy", kwargs) or 40
         self._znear    = Transform._get_kwarg("znear", kwargs) or 2.0
@@ -199,13 +200,12 @@ class PVMFrustum(Transform):
         if self._width is None: return
         aspect = self._width / float(self._height)
 
-        ipd = 0.05
         delta = self.znear * np.tanh(np.deg2rad(self.fovy / 2.0))
         parallax = self.znear / self.zfar
 
         self['projection'] = glm.frustum(
-            -aspect * delta + (ipd / 2.0 * parallax),
-            aspect * delta + (ipd / 2.0 * parallax),
+            -aspect * delta + (self._interpupil / 2.0 * parallax),
+            aspect * delta + (self._interpupil / 2.0 * parallax),
             -delta, delta, self.znear, self.zfar
         )
         # self['projection'] = glm.perspective(self.fovy, aspect,
