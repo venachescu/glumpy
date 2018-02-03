@@ -59,6 +59,8 @@ def on_draw(dt):
     glm.rotate(model, phi, 0, 1, 0)
     transform['model'] = model
 
+    # transform['position'] += np.random.randn(3)
+
 
 # Build cube data
 V, I, O = colorcube()

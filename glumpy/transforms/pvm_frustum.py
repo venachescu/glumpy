@@ -85,13 +85,14 @@ class PVMFrustum(Transform):
         code = library.get("transforms/pvm.glsl")
         Transform.__init__(self, code, *args, **kwargs)
 
-        self._width     = None
-        self._height    = None
-        self._interpupil = 0.1
-        self._distance = Transform._get_kwarg("distance", kwargs) or 5
-        self._fovy     = Transform._get_kwarg("fovy", kwargs) or 40
-        self._znear    = Transform._get_kwarg("znear", kwargs) or 2.0
-        self._zfar     = Transform._get_kwarg("zfar", kwargs) or 100.0
+        self._width      = None
+        self._height     = None
+        self._rotate     = 0.0
+        self._interpupil = Transform._get_kwarg("interpupil", kwargs) or 0.1
+        self._distance   = Transform._get_kwarg("distance", kwargs) or 5
+        self._fovy       = Transform._get_kwarg("fovy", kwargs) or 40
+        self._znear      = Transform._get_kwarg("znear", kwargs) or 2.0
+        self._zfar       = Transform._get_kwarg("zfar", kwargs) or 100.0
         self._view = np.eye(4, dtype=np.float32)
         self._model = np.eye(4, dtype=np.float32)
         self._projection = np.eye(4, dtype=np.float32)
@@ -126,11 +127,22 @@ class PVMFrustum(Transform):
     def distance(self, value):
         """ Distance of the camera to the origin """
 
-        if value > 1:
+        if value > 0.1:
             self._distance = value
             self._view = np.eye(4, dtype=np.float32)
             glm.translate(self._view, 0, 0, -self._distance)
+            self._view = glm.rotate(self._view, self._rotate, 0, 0, 1)
             self["view"] = self._view
+
+    @property
+    def interpupil(self):
+        return self._interpupil
+
+    @interpupil.setter
+    def interpupil(self, value):
+        """ Distance between the eyes of a stereo camera """
+        self._interpupil = value
+        self._build_projection()
 
     @property
     def fovy(self):
@@ -159,7 +171,6 @@ class PVMFrustum(Transform):
         if value < self._zfar:
             self._znear = value
             self._build_projection()
-
 
     @property
     def zfar(self):

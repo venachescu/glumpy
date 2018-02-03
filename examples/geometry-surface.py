@@ -150,9 +150,11 @@ def func3(x,y):
 x = np.linspace(-2.0, 2.0, 32).astype(np.float32)
 y = np.linspace(-2.0, 2.0, 32).astype(np.float32)
 X,Y = np.meshgrid(x, y)
-Z = func3(X,Y)
+# Z = func3(X,Y)
+Z = np.ones_like(X)
 
-surface['data'] = (Z-Z.min())/(Z.max() - Z.min())
+surface['data'] = Z
+# surface['data'] = (Z-Z.min())/(Z.max() - Z.min())
 surface['data'].interpolation = gl.GL_NEAREST
 surface['data_shape'] = Z.shape[1], Z.shape[0]
 surface['u_kernel'] = data.get("spatial-filters.npy")

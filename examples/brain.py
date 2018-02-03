@@ -6,6 +6,7 @@ import numpy as np
 from glumpy import app, gl, gloo, data, log
 from glumpy.transforms import Trackball, Position
 
+from glumpy.transforms.osc_trackball import OSCTrackball
 
 vertex = """
 uniform mat4 m_model;
@@ -61,7 +62,7 @@ log.info("Loading brain mesh")
 vertices,indices = data.get("brain.obj")
 brain = gloo.Program(vertex, fragment)
 brain.bind(vertices)
-trackball = Trackball(Position("position"))
+trackball = OSCTrackball(Position("position"))
 brain['transform'] = trackball
 trackball.theta, trackball.phi, trackball.zoom = 80, -135, 15
 
