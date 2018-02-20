@@ -215,8 +215,8 @@ class PVMFrustum(Transform):
         parallax = self.znear / self.zfar
 
         self['projection'] = glm.frustum(
-            aspect * delta + (self._interpupil / 2.0 * parallax),
             -aspect * delta + (self._interpupil / 2.0 * parallax),
+            aspect * delta + (self._interpupil / 2.0 * parallax),
             -delta, delta, self.znear, self.zfar
         )
         # self['projection'] = glm.perspective(self.fovy, aspect,
